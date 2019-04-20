@@ -1,4 +1,3 @@
-#!/usr/bin/python
 # -*- coding: UTF-8 -*-
 import os
 
@@ -53,3 +52,4 @@ try:
     fh.write("这是一个测试文件，用于测试异常!!")
 finally:
     print("无论有无错误，都会执行finally")
+
