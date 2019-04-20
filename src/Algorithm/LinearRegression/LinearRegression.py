@@ -34,6 +34,7 @@ def optimizer(data,starting_b,starting_m,learning_rate,num_iter):
         b,m =compute_gradient(b,m,data,learning_rate)
         if i%100==0:
             print('iter {0}:error={1}'.format(i,compute_error(b,m,data)))
+
     return [b,m]
 
 def compute_gradient(b_current,m_current,data ,learning_rate):
