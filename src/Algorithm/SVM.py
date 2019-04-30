@@ -1,6 +1,6 @@
 import random
 import numpy as np
-from util.data_utils import load_CIFAR10
+from util.data_utils import load_CIFAR_batch
 import matplotlib.pyplot as plt
 from classifiers import LinearSVM
 from classifiers.linear_svm import svm_loss_naive
@@ -21,7 +21,8 @@ plt.rcParams['image.cmap'] = 'gray'
 # %autoreload 2
 
 # Load the raw CIFAR-10 data.
-cifar10_dir = 'cs231n/datasets/cifar-10-batches-py'
+cifar10_dir = './datasets/cifar-10-batches-py/data_batch_1'
+cifar10_dir_test = './datasets/cifar-10-batches-py/test_batch'
 
 # Cleaning up variables to prevent loading data multiple times (which may cause memory issue)
 try:
@@ -31,7 +32,8 @@ try:
 except:
     pass
 
-X_train, y_train, X_test, y_test = load_CIFAR10(cifar10_dir)
+X_train, y_train = load_CIFAR_batch(cifar10_dir)
+X_test, y_test = load_CIFAR_batch(cifar10_dir_test)
 
 # As a sanity check, we print out the size of the training and test data.
 print('Training data shape: ', X_train.shape)
@@ -59,7 +61,7 @@ plt.show()
 # Split the data into train, val, and test sets. In addition we will
 # create a small development set as a subset of the training data;
 # we can use this for development so our code runs faster.
-num_training = 49000
+num_training = 9000
 num_validation = 1000
 num_test = 1000
 num_dev = 500
@@ -180,6 +182,7 @@ print('difference: %f' % (loss_naive - loss_vectorized))
 # The naive implementation and the vectorized implementation should match, but
 # the vectorized version should still be much faster.
 tic = time.time()
+print(X_dev.shape)
 _, grad_naive = svm_loss_naive(W, X_dev, y_dev, 0.000005)
 toc = time.time()
 print('Naive loss and gradient: computed in %fs' % (toc - tic))
@@ -240,7 +243,7 @@ best_svm = None # The LinearSVM object that achieved the highest validation rate
 ################################################################################
 # TODO:                                                                        #
 # Write code that chooses the best hyperparameters by tuning on the validation #
-# set. For each combination of hyperparameters, train a linear SVM on the      #
+# set. For each combination of hyperparameters, train a linear SVM  on the      #
 # training set, compute its accuracy on the training and validation sets, and  #
 # store these numbers in the results dictionary. In addition, store the best   #
 # validation accuracy in best_val and the LinearSVM object that achieves this  #
@@ -254,7 +257,21 @@ best_svm = None # The LinearSVM object that achieved the highest validation rate
 # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
 
 pass
+for lr in learning_rates:
+    for rs in regularization_strengths:
+        svm = LinearSVM()
+        loss_hist = svm.train(X_train, y_train, learning_rate=lr, reg=rs,
+                              num_iters=1500, verbose=True)
+        y_train_pred = svm.predict(X_train)
+        train_acc = np.mean(y_train == y_train_pred)
+        y_val_pred = svm.predict(X_val)
+        val_acc = np.mean(y_val == y_val_pred)
 
+        results[(lr, rs)] = (train_acc, val_acc)
+
+        if val_acc > best_val:
+            best_val = val_acc
+            best_svm = svm
 # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
 
 # Print out results.
@@ -310,3 +327,4 @@ for i in range(10):
     plt.imshow(wimg.astype('uint8'))
     plt.axis('off')
     plt.title(classes[i])
+    plt.show()

@@ -67,10 +67,10 @@ if __name__ =='__main__':
     knn = knn(x,y)
     index = y[knn.predict(x[10],9)]
     # predict label
-    print(classes[index])
+    print("predict : "+classes[index])
 
     # real label
-    print(classes[y[10]])
+    print("real : "+classes[y[10]])
 
 
     # info = psutil.virtual_memory()

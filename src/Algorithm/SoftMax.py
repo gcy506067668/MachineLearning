@@ -1,6 +1,6 @@
 import random
 import numpy as np
-from util.data_utils import load_CIFAR10
+from util.data_utils import load_CIFAR_batch
 import matplotlib.pyplot as plt
 
 # %matplotlib inline
@@ -13,14 +13,15 @@ plt.rcParams['image.cmap'] = 'gray'
 # %load_ext autoreload
 # %autoreload 2
 
-def get_CIFAR10_data(num_training=49000, num_validation=1000, num_test=1000, num_dev=500):
+def get_CIFAR10_data(num_training=9000, num_validation=1000, num_test=1000, num_dev=500):
     """
     Load the CIFAR-10 dataset from disk and perform preprocessing to prepare
     it for the linear classifier. These are the same steps as we used for the
     SVM, but condensed to a single function.
     """
     # Load the raw CIFAR-10 data
-    cifar10_dir = './datasets/cifar-10-batches-py'
+    cifar10_dir = './datasets/cifar-10-batches-py/data_batch_1'
+    cifar10_dir_test = './datasets/cifar-10-batches-py/test_batch'
 
     # Cleaning up variables to prevent loading data multiple times (which may cause memory issue)
     try:
@@ -30,8 +31,8 @@ def get_CIFAR10_data(num_training=49000, num_validation=1000, num_test=1000, num
     except:
         pass
 
-    X_train, y_train, X_test, y_test = load_CIFAR10(cifar10_dir)
-
+    X_train, y_train = load_CIFAR_batch(cifar10_dir)
+    X_test, y_test = load_CIFAR_batch(cifar10_dir_test)
     # subsample the data
     mask = list(range(num_training, num_training + num_validation))
     X_val = X_train[mask]
@@ -150,7 +151,24 @@ regularization_strengths = [2.5e4, 5e4]
 # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
 
 pass
+from classifiers.linear_classifier import Softmax
 
+for lr in learning_rates:
+    for rs in regularization_strengths:
+        softmax = Softmax()
+        softmax.train(X_train, y_train, learning_rate = lr, reg=rs, num_iters = 1500,
+                      verbose = True)
+
+        y_pred_train = softmax.predict(X_train)
+        acc_train = np.mean(y_pred_train == y_train)
+
+        y_pred_val = softmax.predict(X_val)
+        acc_val = np.mean(y_pred_val == y_val)
+        results[(lr, rs)] = (acc_train, acc_val)
+
+        if acc_val > best_val:
+            best_val = acc_val
+            best_softmax = softmax
 # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
 
 # Print out results.
@@ -182,3 +200,4 @@ for i in range(10):
     plt.imshow(wimg.astype('uint8'))
     plt.axis('off')
     plt.title(classes[i])
+plt.show()

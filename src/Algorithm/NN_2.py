@@ -4,7 +4,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 from classifiers.neural_net import TwoLayerNet
-from util.data_utils import load_CIFAR10
+from util.data_utils import load_CIFAR_batch
 from util.gradient_check import eval_numerical_gradient
 from util.vis_utils import visualize_grid
 
@@ -97,14 +97,15 @@ plt.show()
 
 
 
-def get_CIFAR10_data(num_training=49000, num_validation=1000, num_test=1000):
+def get_CIFAR10_data(num_training=9000, num_validation=1000, num_test=1000):
     """
     Load the CIFAR-10 dataset from disk and perform preprocessing to prepare
     it for the two-layer neural net classifier. These are the same steps as
     we used for the SVM, but condensed to a single function.
     """
     # Load the raw CIFAR-10 data
-    cifar10_dir = 'cs231n/datasets/cifar-10-batches-py'
+    cifar10_dir = './datasets/cifar-10-batches-py/data_batch_2'
+    cifar10_dir_test = './datasets/cifar-10-batches-py/test_batch'
 
     # Cleaning up variables to prevent loading data multiple times (which may cause memory issue)
     try:
@@ -114,7 +115,8 @@ def get_CIFAR10_data(num_training=49000, num_validation=1000, num_test=1000):
     except:
         pass
 
-    X_train, y_train, X_test, y_test = load_CIFAR10(cifar10_dir)
+    X_train, y_train = load_CIFAR_batch(cifar10_dir)
+    X_test, y_test = load_CIFAR_batch(cifar10_dir_test)
 
     # Subsample the data
     mask = list(range(num_training, num_training + num_validation))
@@ -209,8 +211,26 @@ best_net = None # store the best model into this
 # automatically like we did on the previous exercises.                          #
 #################################################################################
 # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
+input_size = 32 * 32 * 3
+num_classes = 10
+best_acc = 0
+# Train the network
+for bs in [200, 400]:
+    for lr in [1e-3, 1e-4, 1e-5]:
+        for hidden_size in [50, 100, 200]:
+            net = TwoLayerNet(input_size, hidden_size, num_classes)
+            stats = net.train(X_train, y_train, X_val, y_val,
+                              num_iters=2000, batch_size=bs,
+                              learning_rate=lr, learning_rate_decay=0.9,
+                              reg=0.5, verbose=True)
 
-pass
+            # Predict on the validation set
+            val_acc = (net.predict(X_val) == y_val).mean()
+            print('batch_size = %d, lr = %f, hidden size = %f, Valid_accuracy: %f' %(bs, lr, hidden_size,val_acc))
+            if val_acc > best_acc:
+                best_acc = val_acc
+                best_net = net
+
 
 # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
 # visualize the weights of the best network
