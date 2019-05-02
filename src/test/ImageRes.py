@@ -66,6 +66,35 @@ def connectImage():
             pass
     return color
 
+def image_to_txt(image_path, txt_path):
+    # 这里使用到PIL库convert函数，将RGB图片转化为灰度图，参数'L'代表转化为灰度图
+    im = Image.open(image_path).convert('L')
+    charWidth = 100
+    # 这个是设置你后面在cmd里面显示内容的窗口大小，请根据自己的情况，适当调整值
+    im = im.resize((charWidth, charWidth // 2))
+    target_width, target_height = im.size
+    data = np.array(im)[:target_height, :target_width]
+    f = open(txt_path, 'w',encoding='utf-8')
+    for row in data:
+        for pixel in row:
+            if pixel > 127: # 如果灰度值大于127，也就是偏白的，就写一个字符 '1'
+                f.write('1')
+            else:
+                f.write(' ')
+        f.write('\n')
+    f.close()
+def getTxt(image_path, txt_path):#调用上面的函数image_to_txt
+    img_count = 1# 一张图对应一个txt文件，所以每遍历一张图，该值加一
+
+    while img_count <= len(os.listdir(image_path)):
+        #os.listdir(image_path)# 返回所有图片名称，是个字符串列表
+        imageFile = image_path+ str(img_count) + '.png'
+        txtFile = txt_path+ str(img_count) + '.txt'
+        image_to_txt.image_to_txt(imageFile, txtFile)
+        print('舞蹈加载中： ' + str(img_count) + '%')
+        img_count += 1
+
+
 color = connectImage()
 imw = len(color)
 imh = 30
