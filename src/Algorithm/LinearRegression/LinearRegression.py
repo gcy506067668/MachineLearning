@@ -5,16 +5,6 @@ import pylab
 
 def compute_error(b,m,data):
 
-    totalError = 0
-    #Two ways to implement this
-    #first way
-    # for i in range(0,len(data)):
-    #     x = data[i,0]
-    #     y = data[i,1]
-    #
-    #     totalError += (y-(m*x+b))**2
-
-    #second way
     x = data[:,0]
     y = data[:,1]
     totalError = (y-m*x-b)**2
@@ -42,18 +32,6 @@ def compute_gradient(b_current,m_current,data ,learning_rate):
     m_gradient = 0
 
     N = float(len(data))
-    #Two ways to implement this
-    #first way
-    # for i in range(0,len(data)):
-    #     x = data[i,0]
-    #     y = data[i,1]
-    #
-    #     #computing partial derivations of our error function
-    #     #b_gradient = -(2/N)*sum((y-(m*x+b))^2)
-    #     #m_gradient = -(2/N)*sum(x*(y-(m*x+b))^2)
-    #     b_gradient += -(2/N)*(y-((m_current*x)+b_current))
-    #     m_gradient += -(2/N) * x * (y-((m_current*x)+b_current))
-
     #Vectorization implementation
     x = data[:,0]
     y = data[:,1]
@@ -83,17 +61,12 @@ def Linear_regression():
     # get train data
     data =np.loadtxt('data.csv',delimiter=',')
 
-    #define hyperparamters
-    #learning_rate is used for update gradient
-    #defint the number that will iteration
-    # define  y =mx+b
     learning_rate = 0.001
     initial_b =0.0
     initial_m = 0.0
     num_iter = 1000
 
-    #train model
-    #print b m error
+
     print('initial variables:\n initial_b = {0}\n intial_m = {1}\n error of begin = {2} \n'
         .format(initial_b,initial_m,compute_error(initial_b,initial_m,data)))
 
@@ -107,5 +80,4 @@ def Linear_regression():
     plot_data(data,b,m)
 
 if __name__ =='__main__':
-
     Linear_regression()

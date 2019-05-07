@@ -15,16 +15,12 @@ plt.rcParams['figure.figsize'] = (10.0, 8.0) # set default size of plots
 plt.rcParams['image.interpolation'] = 'nearest'
 plt.rcParams['image.cmap'] = 'gray'
 
-# Some more magic so that the notebook will reload external python modules;
-# see http://stackoverflow.com/questions/1907993/autoreload-of-modules-in-ipython
-# %load_ext autoreload
-# %autoreload 2
+
 
 # Load the raw CIFAR-10 data.
 cifar10_dir = './datasets/cifar-10-batches-py/data_batch_1'
 cifar10_dir_test = './datasets/cifar-10-batches-py/test_batch'
 
-# Cleaning up variables to prevent loading data multiple times (which may cause memory issue)
 try:
     del X_train, y_train
     del X_test, y_test
@@ -58,9 +54,6 @@ for y, cls in enumerate(classes):
             plt.title(cls)
 plt.show()
 
-# Split the data into train, val, and test sets. In addition we will
-# create a small development set as a subset of the training data;
-# we can use this for development so our code runs faster.
 num_training = 9000
 num_validation = 1000
 num_test = 1000
@@ -221,21 +214,11 @@ print('training accuracy: %f' % (np.mean(y_train == y_train_pred), ))
 y_val_pred = svm.predict(X_val)
 print('validation accuracy: %f' % (np.mean(y_val == y_val_pred), ))
 
-# Use the validation set to tune hyperparameters (regularization strength and
-# learning rate). You should experiment with different ranges for the learning
-# rates and regularization strengths; if you are careful you should be able to
-# get a classification accuracy of about 0.39 on the validation set.
 
-#Note: you may see runtime/overflow warnings during hyper-parameter search.
-# This may be caused by extreme values, and is not a bug.
 
 learning_rates = [1e-7, 5e-5]
 regularization_strengths = [2.5e4, 5e4]
 
-# results is dictionary mapping tuples of the form
-# (learning_rate, regularization_strength) to tuples of the form
-# (training_accuracy, validation_accuracy). The accuracy is simply the fraction
-# of data points that are correctly classified.
 results = {}
 best_val = -1   # The highest validation accuracy that we have seen so far.
 best_svm = None # The LinearSVM object that achieved the highest validation rate.

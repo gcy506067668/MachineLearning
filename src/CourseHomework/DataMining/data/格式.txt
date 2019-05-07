@@ -1,0 +1,4 @@
+
+date open close high low volume \n
+date open close high low volume \n
+date open close high low volume \n

@@ -8,21 +8,11 @@ from util.data_utils import load_CIFAR_batch
 from util.gradient_check import eval_numerical_gradient
 from util.vis_utils import visualize_grid
 
-# %matplotlib inline
-plt.rcParams['figure.figsize'] = (10.0, 8.0) # set default size of plots
-plt.rcParams['image.interpolation'] = 'nearest'
-plt.rcParams['image.cmap'] = 'gray'
 
-# for auto-reloading external modules
-# see http://stackoverflow.com/questions/1907993/autoreload-of-modules-in-ipython
-# %load_ext autoreload
-# %autoreload 2
 
 def rel_error(x, y):
     """ returns relative error """
     return np.max(np.abs(x - y) / (np.maximum(1e-8, np.abs(x) + np.abs(y))))
-# Create a small net and some toy data to check your implementations.
-# Note that we set the random seed for repeatable experiments.
 
 input_size = 4
 hidden_size = 10
