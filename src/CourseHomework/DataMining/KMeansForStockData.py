@@ -6,7 +6,7 @@ from matplotlib import pyplot as plt
 import mpl_finance as mpf
 from matplotlib.pylab import date2num
 from dateutil.parser import parse
-
+from sklearn.metrics import silhouette_score
 
 data_root_path = "./data"
 
@@ -60,8 +60,8 @@ def recoverPreProcessing(data,mean,std):
 # k聚类数目   threadnum     iteration 迭代次数
 def clustering(k,threadnum,iteration,data):
     model = KMeans(n_clusters = k, n_jobs = threadnum, max_iter = iteration)
-    model.fit(data)
-    return model
+    y_predict = model.fit_predict(data)
+    return model,y_predict
 
 #data_list_ = [(date2num(parse(str(20181110))),10,20,5,15)]
 # ##股票数据，格式是往列表里添加元组, 每个元组代表一个股票信息。
@@ -79,7 +79,7 @@ def drawCandle(data):
     plt.ylabel("股价（元）") ##设置Y轴标题
     plt.grid(True, 'major', 'both', ls='--', lw=.5, c='k', alpha=.3)  ##设置网格线
 
-    mpf.candlestick_ohlc(ax,data,width=1.0,colorup='r',colordown='green', alpha=1)##设置利用mpf画股票K线图
+    mpf.candlestick_ohlc(ax,data,width=1.0, alpha=1)##设置利用mpf画股票K线图
     plt.show() ## 显示图片
     plt.savefig("K线.png") ## 保存图片
     plt.close() ## 关闭plt，释放内存
@@ -90,24 +90,32 @@ def drawCandle(data):
 if __name__ =='__main__':
     data = loadData()
     data_zs,mean,std = preprocessing(data)
-    kmModel = clustering(12,4,500,data_zs)
+    ss = []
+    for i in range(6,20):
+        kmModel,y_pre = clustering(12,4,500,data_zs)
+        result = pd.DataFrame(kmModel.cluster_centers_)
+        s = silhouette_score(data_zs, y_pre)
+        ss.append(s)
 
-    result = pd.DataFrame(kmModel.cluster_centers_)
-    result = recoverPreProcessing(result,mean,std)
+        result = recoverPreProcessing(result,mean,std)
+    plt.plot(range(6,20),ss)
+    plt.xlabel("number of clusters")
+    plt.ylabel("silhouette score")
+    plt.show()
 
-    result = result.tolist()
-    drawData = []
-    for index,item in enumerate(result):
-        temp = []
-        if(index<9):
-            date_d = '2019050'+str(index+1)
-        else:
-            date_d = '201905'+str(index+1)
-
-        temp.append((date2num(parse(date_d))))
-        temp.extend(item)
-
-        drawData.append(tuple(temp))
-
-    drawCandle(drawData)
+    # result = result.tolist()
+    # drawData = []
+    # for index,item in enumerate(result):
+    #     temp = []
+    #     if(index<9):
+    #         date_d = '2019050'+str(index+1)
+    #     else:
+    #         date_d = '201905'+str(index+1)
+    #
+    #     temp.append((date2num(parse(date_d))))
+    #     temp.extend(item)
+    #
+    #     drawData.append(tuple(temp))
+    #
+    # drawCandle(drawData)
 
