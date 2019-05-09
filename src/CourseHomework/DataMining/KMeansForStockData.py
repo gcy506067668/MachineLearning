@@ -81,7 +81,6 @@ def drawCandle(data):
 
     mpf.candlestick_ohlc(ax,data,width=1.0, alpha=1)##设置利用mpf画股票K线图
     plt.show() ## 显示图片
-    plt.savefig("K线.png") ## 保存图片
     plt.close() ## 关闭plt，释放内存
 
     pass
