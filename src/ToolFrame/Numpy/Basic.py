@@ -27,3 +27,6 @@ a = np.array([[11, 12, 13, 14, 15],
 # print(a.itemsize) # >>>8   每项占用字节数 此处int64
 # print(a.ndim) # >>>2    数组的维数
 # print(a.nbytes) # >>>200    数组中的所有数据消耗掉的字节数
+
+
+np.prod((2,3,5))   #   计算2*3*5

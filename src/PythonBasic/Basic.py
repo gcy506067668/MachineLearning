@@ -53,6 +53,17 @@ try:
 finally:
     print("无论有无错误，都会执行finally")
 
+
+#列出所有文件
+files = os.listdir("path_here")
+
+#判断是否是文件夹
+os.path.isdir("path")
+
+#判断是否是文件
+os.path.isfile("")
+
+
 # list ['physics', 'chemistry', 1997, 2000]    下标索引
 
 # tuple (1, 2, 3, 4, 5)    下标索引
