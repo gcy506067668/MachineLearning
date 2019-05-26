@@ -3,3 +3,4 @@ venv/
 .idea/
 /src/Algorithm/datasets/
 /src/datasets/
+/src/CourseHomework/CS231N/datasets/
