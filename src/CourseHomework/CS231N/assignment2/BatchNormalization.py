@@ -17,10 +17,11 @@ Internal Covariate Shift", ICML 2015.](https://arxiv.org/abs/1502.03167)
 import time
 import numpy as np
 import matplotlib.pyplot as plt
-from .cs231n.classifiers.fc_net import *
-from .cs231n.data_utils import get_CIFAR10_data
-from .cs231n.gradient_check import eval_numerical_gradient, eval_numerical_gradient_array
-from .cs231n.solver import Solver
+# from .cs231n.classifiers.fc_net import *
+from cs231n.data_utils import get_CIFAR10_data
+from cs231n.gradient_check import eval_numerical_gradient, eval_numerical_gradient_array
+from cs231n.solver import Solver
+from cs231n.layers import *
 
 
 def rel_error(x, y):
