@@ -80,17 +80,17 @@ transform = T.Compose([
 # iterates through the Dataset and forms minibatches. We divide the CIFAR-10
 # training set into train and val sets by passing a Sampler object to the
 # DataLoader telling how it should sample from the underlying Dataset.
-cifar10_train = dset.CIFAR10('./cs231n/datasets', train=True, download=True,
+cifar10_train = dset.CIFAR10('C:/Users/Letmesleep/Desktop/ML/MLDatasets', train=True, download=False,
                              transform=transform)
 loader_train = DataLoader(cifar10_train, batch_size=64, 
                           sampler=sampler.SubsetRandomSampler(range(NUM_TRAIN)))
 
-cifar10_val = dset.CIFAR10('./cs231n/datasets', train=True, download=True,
+cifar10_val = dset.CIFAR10('C:/Users/Letmesleep/Desktop/ML/MLDatasets', train=True, download=False,
                            transform=transform)
 loader_val = DataLoader(cifar10_val, batch_size=64, 
                         sampler=sampler.SubsetRandomSampler(range(NUM_TRAIN, 50000)))
 
-cifar10_test = dset.CIFAR10('./cs231n/datasets', train=False, download=True, 
+cifar10_test = dset.CIFAR10('C:/Users/Letmesleep/Desktop/ML/MLDatasets', train=False, download=False,
                             transform=transform)
 loader_test = DataLoader(cifar10_test, batch_size=64)
 '''
@@ -106,6 +106,10 @@ if USE_GPU and torch.cuda.is_available():
     device = torch.device('cuda')
 else:
     device = torch.device('cpu')
+
+
+
+
 
 # Constant to control how frequently we print train loss
 print_every = 100
@@ -140,8 +144,8 @@ def flatten(x):
 
 def test_flatten():
     x = torch.arange(12).view(2, 1, 3, 2)
-    print('Before flattening: ', x)
-    print('After flattening: ', flatten(x))
+    # print('Before flattening: ', x)
+    # print('After flattening: ', flatten(x))
 
 test_flatten()
 '''
@@ -196,7 +200,7 @@ def two_layer_fc_test():
     w1 = torch.zeros((50, hidden_layer_size), dtype=dtype)
     w2 = torch.zeros((hidden_layer_size, 10), dtype=dtype)
     scores = two_layer_fc(x, [w1, w2])
-    print(scores.size())  # you should see [64, 10]
+    # print(scores.size())  # you should see [64, 10]
 
 two_layer_fc_test()
 '''
@@ -245,6 +249,15 @@ def three_layer_convnet(x, params):
     # TODO: Implement the forward pass for the three-layer ConvNet.                #
     ################################################################################
     # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
+    N,C,H,W = x.shape
+
+    conv1_padding = (int)((conv_w1.shape[2]-1)/2)
+    conv1_out = F.conv2d(x,conv_w1,conv_b1,padding=conv1_padding)
+    conv2_padding = (int)((conv_w2.shape[2]-1)/2)
+    conv2_out = F.conv2d(conv1_out,conv_w2,conv_b2,padding=conv2_padding)
+    fc_input = conv2_out.view(N,-1)
+
+    scores = fc_input.mm(fc_w)+fc_b      #m1: [64 x 6084], m2: [9216 x 10]
 
     pass
 
@@ -271,8 +284,10 @@ def three_layer_convnet_test():
     fc_b = torch.zeros(10)
 
     scores = three_layer_convnet(x, [conv_w1, conv_b1, conv_w2, conv_b2, fc_w, fc_b])
-    print(scores.size())  # you should see [64, 10]
-three_layer_convnet_test()
+    # print(scores.size())  # you should see [64, 10]
+
+# three_layer_convnet_test()
+
 '''
 ### Barebones PyTorch: Initialization
 Let's write a couple utility methods to initialize the weight matrices for our models.
@@ -406,7 +421,7 @@ learning_rate = 1e-2
 w1 = random_weight((3 * 32 * 32, hidden_layer_size))
 w2 = random_weight((hidden_layer_size, 10))
 
-train_part2(two_layer_fc, [w1, w2], learning_rate)
+#train_part2(two_layer_fc, [w1, w2], learning_rate)       #todo-----------open release
 '''
 ### BareBones PyTorch: Training a ConvNet
 
@@ -438,7 +453,14 @@ fc_b = None
 # TODO: Initialize the parameters of a three-layer ConvNet.                    #
 ################################################################################
 # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
+conv_w1 = random_weight((channel_1,3,5,5))
+conv_b1 = zero_weight((channel_1,))
 
+conv_w2 = random_weight((channel_2,32,3,3))
+conv_b2 = zero_weight((channel_2,))
+
+fc_w = random_weight((32*32*16,10))
+fc_b = zero_weight((10))
 pass
 
 # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
@@ -447,7 +469,8 @@ pass
 ################################################################################
 
 params = [conv_w1, conv_b1, conv_w2, conv_b2, fc_w, fc_b]
-train_part2(three_layer_convnet, params, learning_rate)
+
+# train_part2(three_layer_convnet, params, learning_rate)
 '''
 # Part III. PyTorch Module API
 
@@ -490,8 +513,10 @@ def test_TwoLayerFC():
     x = torch.zeros((64, input_size), dtype=dtype)  # minibatch size 64, feature dimension 50
     model = TwoLayerFC(input_size, 42, 10)
     scores = model(x)
-    print(scores.size())  # you should see [64, 10]
-test_TwoLayerFC()
+    # print(scores.size())  # you should see [64, 10]
+# test_TwoLayerFC()
+
+
 '''
 ### Module API: Three-Layer ConvNet
 It's your turn to implement a 3-layer ConvNet followed by a fully connected layer. The network architecture should be the same as in Part II:
@@ -516,9 +541,15 @@ class ThreeLayerConvNet(nn.Module):
         # architecture defined above.                                          #
         ########################################################################
         # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
+        self.conv1 = nn.Conv2d(in_channel,channel_1,5,padding=2)
+        nn.init.kaiming_normal_(self.conv1.weight,nonlinearity='relu')
 
-        pass
 
+        self.conv2 = nn.Conv2d(channel_1,channel_2,3,padding=1)
+        nn.init.kaiming_normal_(self.conv2.weight,nonlinearity='relu')
+
+        self.fc = nn.Linear(channel_2*32*32,num_classes)
+        nn.init.kaiming_normal_(self.fc.weight,nonlinearity='relu')
         # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
         ########################################################################
         #                          END OF YOUR CODE                            #       
@@ -532,8 +563,11 @@ class ThreeLayerConvNet(nn.Module):
         # connectivity of those layers in forward()                            #
         ########################################################################
         # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
+        layer1_out = F.relu(self.conv1(x))
 
-        pass
+        layer2_out = F.relu(self.conv2(layer1_out))
+        layer2_out = flatten(layer2_out)
+        scores = self.fc(layer2_out)
 
         # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
         ########################################################################
@@ -547,7 +581,7 @@ def test_ThreeLayerConvNet():
     model = ThreeLayerConvNet(in_channel=3, channel_1=12, channel_2=8, num_classes=10)
     scores = model(x)
     print(scores.size())  # you should see [64, 10]
-test_ThreeLayerConvNet()
+# test_ThreeLayerConvNet()
 '''
 ### Module API: Check Accuracy
 Given the validation or test set, we can check the classification accuracy of a neural network. 
@@ -628,7 +662,7 @@ learning_rate = 1e-2
 model = TwoLayerFC(3 * 32 * 32, hidden_layer_size, 10)
 optimizer = optim.SGD(model.parameters(), lr=learning_rate)
 
-train_part34(model, optimizer)
+# train_part34(model, optimizer)
 '''
 ### Module API: Train a Three-Layer ConvNet
 You should now use the Module API to train a three-layer ConvNet on CIFAR. This should look very similar to training the two-layer network! You don't need to tune any hyperparameters, but you should achieve above above 45% after training for one epoch.
@@ -645,6 +679,8 @@ optimizer = None
 # TODO: Instantiate your ThreeLayerConvNet model and a corresponding optimizer #
 ################################################################################
 # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
+model = ThreeLayerConvNet(in_channel=3, channel_1=32, channel_2=16, num_classes=10)
+optimizer = optim.SGD(model.parameters(), lr=learning_rate)
 
 pass
 
@@ -652,8 +688,11 @@ pass
 ################################################################################
 #                                 END OF YOUR CODE                             
 ################################################################################
-
+print("train_part34(model, optimizer)")
 train_part34(model, optimizer)
+
+
+
 '''
 # Part IV. PyTorch Sequential API
 
@@ -688,7 +727,7 @@ model = nn.Sequential(
 optimizer = optim.SGD(model.parameters(), lr=learning_rate,
                      momentum=0.9, nesterov=True)
 
-train_part34(model, optimizer)
+# train_part34(model, optimizer)
 '''
 ### Sequential API: Three-Layer ConvNet
 Here you should use `nn.Sequential` to define and train a three-layer ConvNet with the same architecture we used in Part III:
@@ -717,6 +756,17 @@ optimizer = None
 # Sequential API.                                                              #
 ################################################################################
 # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
+model = nn.Sequential(
+    Flatten(),
+    nn.Conv2d(3, channel_1,5,padding=2),
+    nn.ReLU(),
+    nn.Conv2d(channel_1,channel_2,3,padding=1),
+    nn.ReLU(),
+    nn.Linear(channel_2*32*32,10)
+)
+
+optimizer = optim.SGD(model.parameters(), lr=learning_rate,
+                   momentum=0.9, nesterov=True)
 
 pass
 
