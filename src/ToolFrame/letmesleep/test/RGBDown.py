@@ -90,4 +90,8 @@ def show3DImage():
 
     plt.show()
 
+<<<<<<< HEAD
 showRGBDown()
+=======
+show3DImage()
+>>>>>>> cdbeead0c47804e84edc5c263f36b2f3f8793492
