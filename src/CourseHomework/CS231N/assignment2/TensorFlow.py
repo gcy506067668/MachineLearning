@@ -75,7 +75,7 @@ import math
 import timeit
 import matplotlib.pyplot as plt
 
-%matplotlib inline
+
 def load_cifar10(num_training=49000, num_validation=1000, num_test=10000):
     """
     Fetch the CIFAR-10 dataset from the web and perform preprocessing to prepare

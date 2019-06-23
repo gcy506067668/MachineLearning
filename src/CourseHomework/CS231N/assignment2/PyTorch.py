@@ -80,17 +80,17 @@ transform = T.Compose([
 # iterates through the Dataset and forms minibatches. We divide the CIFAR-10
 # training set into train and val sets by passing a Sampler object to the
 # DataLoader telling how it should sample from the underlying Dataset.
-cifar10_train = dset.CIFAR10('C:/Users/Letmesleep/Desktop/ML/MLDatasets', train=True, download=False,
+cifar10_train = dset.CIFAR10('./cs231n/datasets', train=True, download=False,
                              transform=transform)
 loader_train = DataLoader(cifar10_train, batch_size=64, 
                           sampler=sampler.SubsetRandomSampler(range(NUM_TRAIN)))
 
-cifar10_val = dset.CIFAR10('C:/Users/Letmesleep/Desktop/ML/MLDatasets', train=True, download=False,
+cifar10_val = dset.CIFAR10('./cs231n/datasets', train=True, download=False,
                            transform=transform)
 loader_val = DataLoader(cifar10_val, batch_size=64, 
                         sampler=sampler.SubsetRandomSampler(range(NUM_TRAIN, 50000)))
 
-cifar10_test = dset.CIFAR10('C:/Users/Letmesleep/Desktop/ML/MLDatasets', train=False, download=False,
+cifar10_test = dset.CIFAR10('./cs231n/datasets', train=False, download=False,
                             transform=transform)
 loader_test = DataLoader(cifar10_test, batch_size=64)
 '''
@@ -644,7 +644,7 @@ def train_part34(model, optimizer, epochs=1):
             optimizer.step()
 
             if t % print_every == 0:
-                print('Iteration %d, loss = %.4f' % (t, loss.item()))
+                # print('Iteration %d, loss = %.4f' % (t, loss.item()))
                 check_accuracy_part34(loader_val, model)
                 print()
 '''
@@ -688,8 +688,7 @@ pass
 ################################################################################
 #                                 END OF YOUR CODE                             
 ################################################################################
-print("train_part34(model, optimizer)")
-train_part34(model, optimizer)
+# train_part34(model, optimizer)
 
 
 
@@ -756,12 +755,15 @@ optimizer = None
 # Sequential API.                                                              #
 ################################################################################
 # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
+hidden_layer_size = 1000
+
 model = nn.Sequential(
+
+    nn.Conv2d(3, channel_1,kernel_size=5,padding=2),
+    nn.ReLU(),
+    nn.Conv2d(channel_1,channel_2,kernel_size=3,padding=1),
+    nn.ReLU(),
     Flatten(),
-    nn.Conv2d(3, channel_1,5,padding=2),
-    nn.ReLU(),
-    nn.Conv2d(channel_1,channel_2,3,padding=1),
-    nn.ReLU(),
     nn.Linear(channel_2*32*32,10)
 )
 
@@ -775,7 +777,7 @@ pass
 #                                 END OF YOUR CODE                             
 ################################################################################
 
-train_part34(model, optimizer)
+# train_part34(model, optimizer)
 '''
 # Part V. CIFAR-10 open-ended challenge
 
@@ -840,11 +842,47 @@ If you are feeling adventurous there are many other features you can implement t
 ################################################################################
 model = None
 optimizer = None
-
+channel_1 = 32
+channel_2 = 32
 # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
+hidden_layer_size = 3000
 
-pass
+model = nn.Sequential(
 
+    nn.Conv2d(3, channel_1,kernel_size=3,padding=1),
+    nn.BatchNorm2d(32),
+    nn.ReLU(),
+    nn.Conv2d(channel_1,channel_2,kernel_size=3,padding=1),
+    nn.BatchNorm2d(32),
+    nn.ReLU(),
+    nn.Conv2d(channel_2,channel_2,kernel_size=3,padding=1),
+    nn.BatchNorm2d(32),
+    nn.ReLU(),
+    nn.Conv2d(channel_2,channel_2,kernel_size=3,padding=1),
+    nn.BatchNorm2d(32),
+    nn.ReLU(),
+    nn.Conv2d(channel_2,channel_2,kernel_size=3,padding=1),
+    nn.BatchNorm2d(32),
+    nn.ReLU(),
+    nn.MaxPool2d(2, stride=2),
+    Flatten(),
+    nn.Linear(channel_2*16*16,hidden_layer_size),
+    nn.Dropout(p=0.5),
+    nn.ReLU(),
+    nn.Linear(hidden_layer_size, 10)
+)
+
+optimizer = optim.SGD(model.parameters(), lr=learning_rate,
+                   momentum=0.9, nesterov=True)
+
+
+'''
+    max accuracy 77.1%
+    max accuracy 78.1%
+    max accuracy 78.5%  3层
+    max accuracy 79.3%  5层
+    max accuracy 81.0%  5层 dropout
+'''
 # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
 ################################################################################
 #                                 END OF YOUR CODE                             
