@@ -5,6 +5,7 @@ import numpy as np
 
 import os
 
+
 def showRGBDown():
     im = Image.open(os.path.join('./test.jpg'))
     plt.imshow(im)
@@ -90,4 +91,4 @@ def show3DImage():
 
     plt.show()
 
-show3DImage()
+showRGBDown()
