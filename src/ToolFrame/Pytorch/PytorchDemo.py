@@ -1,18 +1,57 @@
 import torch
 import torchvision
 import torchvision.transforms as transforms
+
+
+data_root_path = "/home/letmesleep/project/mldatasets/"
+
+
+transform = transforms.Compose(
+    [transforms.ToTensor(),
+     transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))])
+
+trainset = torchvision.datasets.CIFAR10(root=data_root_path, train=True,
+                                        download=False, transform=transform)
+
+trainloader = torch.utils.data.DataLoader(trainset, batch_size=4,
+                                          shuffle=True, num_workers=2)
+
+testset = torchvision.datasets.CIFAR10(root=data_root_path, train=False,
+                                       download=False, transform=transform)
+
+testloader = torch.utils.data.DataLoader(testset, batch_size=4,
+                                         shuffle=False, num_workers=2)
+
+classes = ('plane', 'car', 'bird', 'cat',
+           'deer', 'dog', 'frog', 'horse', 'ship', 'truck')
+
 import matplotlib.pyplot as plt
 import numpy as np
-import torch.utils.data as data
-from PIL import Image
-import os,sys
-import pickle
-import torch.optim as optim
+
+
+# functions to show an image
+
+
+def imshow(img):
+    img = img / 2 + 0.5     # unnormalize
+    npimg = img.numpy()
+    plt.imshow(np.transpose(npimg, (1, 2, 0)))
+    plt.show()
+
+
+# get some random training images
+dataiter = iter(trainloader)
+images, labels = dataiter.next()
+
+# show images
+imshow(torchvision.utils.make_grid(images))
+# print labels
+print(' '.join('%5s' % classes[labels[j]] for j in range(4)))
+
+
 import torch.nn as nn
 import torch.nn.functional as F
 
-
-data_root_path = "../../datasets/cifar-10-python"
 
 class Net(nn.Module):
     def __init__(self):
@@ -34,101 +73,11 @@ class Net(nn.Module):
         return x
 
 
-class MCIFAR_10_Load(data.Dataset):
-
-
-    def __init__(self, root, train=True,transform=None, target_transform=None,):
-        self.root = os.path.expanduser(root)
-        self.transform = transform
-        self.target_transform = target_transform
-        self.train = train  # training set or test set
-        self.data = []
-        self.targets = []
-
-        if self.train:
-            for b in range(1, 6):
-                f = os.path.join(root, 'data_batch_%d' % (b,))
-                with open(f, 'rb') as f:
-                    entry = pickle.load(f, encoding='latin1')
-                    self.data.append(entry['data'])
-                    if 'labels' in entry:
-                        self.targets.extend(entry['labels'])
-                    else:
-                        self.targets.extend(entry['fine_labels'])
-
-
-        else:
-            f = os.path.join(root, 'test_batch')
-            with open(f, 'rb') as f:
-                entry = pickle.load(f, encoding='latin1')
-                self.data.append(entry['data'])
-                if 'labels' in entry:
-                    self.targets.extend(entry['labels'])
-                else:
-                    self.targets.extend(entry['fine_labels'])
-
-        self.data = np.vstack(self.data).reshape(-1, 3, 32, 32)
-        self.data = self.data.transpose((0, 2, 3, 1))  # convert to HWC
-        # now load the picked numpy arrays
-
-
-
-    def __getitem__(self, index):
-        """
-        Args:
-            index (int): Index
-
-        Returns:
-            tuple: (image, target) where target is index of the target class.
-        """
-        img, target = self.data[index], self.targets[index]
-
-        # doing this so that it is consistent with all other datasets
-        # to return a PIL Image
-        img = Image.fromarray(img)
-
-        if self.transform is not None:
-            img = self.transform(img)
-
-        if self.target_transform is not None:
-            target = self.target_transform(target)
-
-        return img, target
-
-    def __len__(self):
-        return len(self.data)
-
-    def __repr__(self):
-        fmt_str = 'Dataset ' + self.__class__.__name__ + '\n'
-        fmt_str += '    Number of datapoints: {}\n'.format(self.__len__())
-        tmp = 'train' if self.train is True else 'test'
-        fmt_str += '    Split: {}\n'.format(tmp)
-        fmt_str += '    Root Location: {}\n'.format(self.root)
-        tmp = '    Transforms (if any): '
-        fmt_str += '{0}{1}\n'.format(tmp, self.transform.__repr__().replace('\n', '\n' + ' ' * len(tmp)))
-        tmp = '    Target Transforms (if any): '
-        fmt_str += '{0}{1}'.format(tmp, self.target_transform.__repr__().replace('\n', '\n' + ' ' * len(tmp)))
-        return fmt_str
-
-    pass
-
-transform = transforms.Compose(
-    [transforms.ToTensor(),
-     transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))])
-
-trainset = MCIFAR_10_Load(root=data_root_path, train=True,transform=transform)
-
-trainloader = torch.utils.data.DataLoader(trainset, batch_size=4,
-                                          shuffle=True, num_workers=2)
-
-testset = MCIFAR_10_Load(root=data_root_path, train=False, transform=transform)
-testloader = torch.utils.data.DataLoader(testset, batch_size=4,
-                                         shuffle=False, num_workers=2)
-
-classes = ('plane', 'car', 'bird', 'cat', 'deer', 'dog', 'frog', 'horse', 'ship', 'truck')
-
-
 net = Net()
+
+
+import torch.optim as optim
+
 criterion = nn.CrossEntropyLoss()
 optimizer = optim.SGD(net.parameters(), lr=0.001, momentum=0.9)
 
@@ -136,7 +85,7 @@ for epoch in range(2):  # loop over the dataset multiple times
 
     running_loss = 0.0
     for i, data in enumerate(trainloader, 0):
-        # get the inputs
+        # get the inputs; data is a list of [inputs, labels]
         inputs, labels = data
 
         # zero the parameter gradients
@@ -156,3 +105,30 @@ for epoch in range(2):  # loop over the dataset multiple times
             running_loss = 0.0
 
 print('Finished Training')
+
+
+dataiter = iter(testloader)
+images, labels = dataiter.next()
+
+# print images
+imshow(torchvision.utils.make_grid(images))
+print('GroundTruth: ', ' '.join('%5s' % classes[labels[j]] for j in range(4)))
+
+
+class_correct = list(0. for i in range(10))
+class_total = list(0. for i in range(10))
+with torch.no_grad():
+    for data in testloader:
+        images, labels = data
+        outputs = net(images)
+        _, predicted = torch.max(outputs, 1)
+        c = (predicted == labels).squeeze()
+        for i in range(4):
+            label = labels[i]
+            class_correct[label] += c[i].item()
+            class_total[label] += 1
+
+
+for i in range(10):
+    print('Accuracy of %5s : %2d %%' % (
+        classes[i], 100 * class_correct[i] / class_total[i]))
