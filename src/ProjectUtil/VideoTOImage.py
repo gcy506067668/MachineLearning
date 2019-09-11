@@ -66,10 +66,10 @@ def cutVideosToImage(dataroot,img_save_path):
 
 if __name__ == '__main__':
 
-    # command = os.popen("pwd")
-    # dataroot = command.read()
-    # command.close()
-    dataroot = "/home/letmesleep/data/test"
+    command = os.popen("pwd")
+    dataroot = command.read()
+    command.close()
+    # dataroot = "/home/letmesleep/data/test"
     videos = cutVideosToImage(dataroot,dataroot+"_img")
 
 
